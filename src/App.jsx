@@ -6,7 +6,7 @@ import {
   Image,
   Center,
   SimpleGrid,
-  Card,CardBody,
+  Card, CardBody,
   Heading,
   Input,
   Skeleton,
@@ -14,58 +14,56 @@ import {
   Stack,
   Tooltip
 } from '@chakra-ui/react'
-import CoffeeLogo from './coffee.svg'
-import { ConnectWallet,Web3Button,useContract, useContractRead } from '@thirdweb-dev/react';
-import { BUYACOFFEE_ADDRESS } from './const/contractAddress';
-import { useState,useEffect } from 'react';
+import dayjs from "dayjs";
+import CarLogo from './coffee.svg'
+import { ConnectWallet, Web3Button, useContract, useContractRead } from '@thirdweb-dev/react';
+import { RENTACAR_ADDRESS } from './const/contractAddress';
+import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { InfoOutlineIcon } from '@chakra-ui/icons';
 
 // import { Card, CardHeader, CardBody, CardFooter } from '@chakra-ui/react'
 export default function Home() {
-  const {contract} = useContract(BUYACOFFEE_ADDRESS)
-  const [name ,setName] = useState('') 
-  const [message ,setMessage] = useState('') 
+  const { contract } = useContract(RENTACAR_ADDRESS)
+  const [name, setName] = useState('')
+  const [name2, setName2] = useState('')
+  const [message, setMessage] = useState('')
+  const [message2, setMessage2] = useState('')
   // useEffect(()=>{
   //   console.log('contract',contract)
   // },[contract])
   const {
-    data:totalCoffee,
-    isLoading: loadingTotalCoffee
-  } = useContractRead(contract,'getTotalCoffee')
+    data: totalCar,
+    isLoading: loadingTotalCar
+  } = useContractRead(contract, 'getTotalCar')
   const {
-    data:recentCoffee,
-    isLoading: loadingRecentCoffee
-  } = useContractRead(contract,'getAllCoffee')
-  useEffect(() =>{
-    if (recentCoffee){
-      console.log('recentCoffee',recentCoffee)
-    }
-  },[recentCoffee])
+    data: recentCar,
+    isLoading: loadingRecentCar
+  } = useContractRead(contract, 'getAllCar')
   return (
     <Box bg='#FEFEFE' w={'100%'} h={'100%'} >
       <Container maxW={'1200px'} w={'100%'}>
         {/**/}
         <Flex
           px='10px'
-          bg={'#fff'}  
+          bg={'#fff'}
           h={'120px'}
           borderRadius={'20px'}
           boxShadow={'lg'}
         >
           <Center w='100%'>
             <Image
-              src={CoffeeLogo}
+              src={CarLogo}
               width={50}
               height={50}
-              alt='a coffee picture'
+              alt='a Car picture'
             />
             <Text
               w='100%'
               fontWeight={600}
               fontSize={'24px'}
             >
-              Buy me coffee
+              Rent me Car
             </Text>
             <Box mr='2rem'>
               <ConnectWallet
@@ -96,15 +94,15 @@ export default function Home() {
                     size={'md'}
                     mb={'20px'}
                   >
-                    Buy me a coffee
+                    Rent me a Car
                   </Heading>
                   <Flex>
-                    <Text>Total Coffee : </Text>
+                    <Text>Total Car : </Text>
                     <Skeleton
-                      isLoaded={!loadingTotalCoffee}
+                      isLoaded={!loadingTotalCar}
                       width={'10px'}
                     >
-                      {totalCoffee?.toString()}
+                      {totalCar?.toString()}
                     </Skeleton>
                   </Flex>
                   <Text
@@ -112,47 +110,74 @@ export default function Home() {
                     mt={'10px'}
                     py={'10px'}
                   >
-                    妳的名字
+                    車車名稱
                   </Text>
                   <Input
                     bg={'gray.100'}
                     maxLength={16}
-                    placeholder='input your name ex:Albert'
+                    placeholder='carname'
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
                   <Text
                     fontSize={'xl'}
+                    mt={'10px'}
                     py={'10px'}
                   >
-                    訊息
+                    你的名稱
                   </Text>
-                  <Textarea
+                  <Input
                     bg={'gray.100'}
-                    size={'lg'}
+                    maxLength={16}
+                    placeholder='_username'
+                    value={name2}
+                    onChange={(e) => setName2(e.target.value)}
+                  />
+                  <Text
+                    fontSize={'xl'}
+                    py={'10px'}
+                  >
+                    hour
+                  </Text>
+                  <Input
+                    bg={'gray.100'}
+                    maxLength={16}
+                    placeholder='hour'
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder='give me information'
+                  />
+                  <Text
+                    fontSize={'xl'}
+                    py={'10px'}
+                  >
+                    price
+                  </Text>
+                  <Input
+                    bg={'gray.100'}
+                    maxLength={16}
+                    placeholder='price'
+                    value={message2}
+                    onChange={(e) => setMessage2(e.target.value)}
                   />
                   <Box mt={'20px'}>
                     <Center>
                       <Web3Button
-                        contractAddress={BUYACOFFEE_ADDRESS}
-                        action={async() => {
-                          await contract.call('buyCoffee',[message,name],{
-                            value: ethers.utils.parseEther('0.01')
+                        contractAddress={RENTACAR_ADDRESS}
+                        action={async () => {
+                          await contract.call('buyCar', [name, name2, message, message2], {
+                            value: message2 * message
                           })
                         }}
-                        onSuccess={() =>{
+                        onSuccess={() => {
                           setMessage('')
                           setName('')
                           alert('成功囉')
                         }}
-                        onError={(error) =>{
+                        onError={(error) => {
                           alert(error)
                         }}
                       >
-                        買一杯咖啡 0.01 Eth
+                        豬車
                       </Web3Button>
                     </Center>
                   </Box>
@@ -162,54 +187,59 @@ export default function Home() {
             <Box>
               <Card maxH={'50vh'} overflow={'scroll'}>
                 <CardBody>
-                  <Heading 
-                    mb={'20px'} 
+                  <Heading
+                    mb={'20px'}
                     size={'md'}
                   >
-                    Who buy coffee
+                    Who rent Car
                   </Heading>
-                  {!loadingRecentCoffee ?
+                  {!loadingRecentCar ?
                     (
                       <Box>
-                        {recentCoffee && recentCoffee?.map((coffee,index) => {
+                        {recentCar && recentCar?.map((Car, index) => {
                           return (
                             <Card key={index} my={'10px'}>
                               <CardBody>
                                 <Flex alignItems={'center'} mb={'10px'}>
                                   <Image
-                                    src={CoffeeLogo}
-                                    alt='Coffee'
+                                    src={CarLogo}
+                                    alt='Car'
                                     width={30}
                                     height={30}
                                     mr={'10px'}
                                   />
                                   <Text fontWeight={'bold'} mr={'10px'}>
-                                    {coffee[2]?coffee[2]:'匿名人士'}
+                                    {Car[2] ? Car[2] : '匿名人士'}
                                   </Text>
                                   <Tooltip
-                                    label={`錢包地址:${coffee[0]}`}
+                                    label={`Time:${dayjs.unix(Car[1]?.toString())}`}
                                     bg={'gray.200'}
                                     color={'black'}
                                   >
-                                    <InfoOutlineIcon/>
+                                    <InfoOutlineIcon />
                                   </Tooltip>
                                 </Flex>
                                 <Flex>
-                                <Text  mr={'10px'}>
-                                    {coffee[1]?coffee[1]:'no message'}
+                                  <Text mr={'10px'}>
+                                    Car : {Car[5] ? Car[5] : 'no message'}
+                                  </Text>
+                                </Flex>
+                                <Flex>
+                                  <Text mr={'10px'}>
+                                    Hour : {Car[3]?.toString() ? Car[3]?.toString() : 'no message'}
                                   </Text>
                                 </Flex>
                               </CardBody>
                             </Card>
                           )
-                          })
+                        })
                         }
                       </Box>
                     ) : (
                       <Stack>
-                        <Skeleton height={'100px'}/>
-                        <Skeleton height={'100px'}/>
-                        <Skeleton height={'100px'}/>
+                        <Skeleton height={'100px'} />
+                        <Skeleton height={'100px'} />
+                        <Skeleton height={'100px'} />
                       </Stack>
                     )
                   }
